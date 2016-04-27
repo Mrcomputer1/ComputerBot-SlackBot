@@ -152,14 +152,14 @@ sbot.hears(['sayasurl'], ["mention", "direct_mention"], function(bot, message){
 			dm._who = res.text;
 			dm.next();
 			dm.ask('Icon URL?', function(res, dm){
-				dm._emoji = res.text;
+				dm._url = res.text;
 				dm.next();
 				dm.ask('Message?', function(res, dm){
 					dm._msg = res.text;
 					dm._bot.reply(message,{
 						text: dm._msg,
 						username: dm._who,
-						icon_url: dm._emoji,
+						icon_url: dm._url,
 						as_user: false
 					});
 					dm.next();
@@ -176,7 +176,7 @@ sbot.hears(['^sayasurl$'], ["direct_message"], function(bot, message){
 			dm._who = res.text;
 			dm.next();
 			dm.ask('Icon URL?', function(res, dm){
-				dm._emoji = res.text;
+				dm._url = res.text;
 				dm.next();
 				dm.ask('Message?', function(res, dm){
 					dm._msg = res.text;
@@ -186,7 +186,7 @@ sbot.hears(['^sayasurl$'], ["direct_message"], function(bot, message){
 						dm._bot.say({
 							text: dm._msg,
 							username: dm._who,
-							icon_url: dm._emoji,
+							icon_url: dm._url,
 							channel: dm._ch,
 							as_user: false
 						});

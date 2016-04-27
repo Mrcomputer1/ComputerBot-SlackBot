@@ -8,9 +8,9 @@
  * This is the main file for ComputerBot it contains the bot code and the HTTP server used to display channel IDs and OpenShift's /health URL
 */
 var bot_config = {
-	restart_password: "<private>",
-	shutdown_password: "<private>",
-	bot_api_token: "<private>",
+	restart_password: "(private)",
+	shutdown_password: "(private)",
+	bot_api_token: "(private)",
 	bot_debug: false
 }
 
@@ -33,13 +33,14 @@ sbot.spawn({
 sbot.hears(['^what can you do$', '^help$'], ["mention", "direct_mention", "direct_message"], function(bot, message){
 	bot.startPrivateConversation(message, function(res, dm){
 		dm.say("*--------------------[Start command list]--------------------*");
-		dm.say("_sayas_ : Send a message as someone else : Mention");
-		dm.say("_sayas_ : Send a message as someone else (asks for channel id) : Direct mention, Direct message");
+		dm.say("_sayas_ or _sayasurl_ for Image URL : Send a message as someone else : Mention");
+		dm.say("_sayas_ or _sayasurl_ for Image URL : Send a message as someone else (asks for channel id) : Direct mention, Direct message");
 		dm.say("_channelid_ : Says the channel ID : Mention, Direct message");
 		dm.say("_userid_ : Says the user ID : Mention, Direct message");
 		dm.say("_shutdown_: Shuts the bot down : Direct message");
 		dm.say("_restart_: Restarts the bot : Direct message");
-		dm.say("_say (name) (emoji) (channel id) (message - __ for space)_: Quick sayas command : Direct message")
+		dm.say("_say (name) (emoji) (channel id) (message - __ for space)_: Quick sayas command : Direct message");
+		dm.say("_say (name) (url) (channel id) (message - __ for space)_: Quick sayas command : Direct message");
 		dm.say("*--------------------[End Command List]--------------------*");
 	});
 });
@@ -141,6 +142,68 @@ sbot.hears(['^restart$'], ['direct_message'], function(bot, message){
 				dm.next();
 			}
 		})
+	});
+});
+sbot.hears(['sayasurl'], ["mention", "direct_mention"], function(bot, message){
+	$_temp1 = bot;
+	bot.startPrivateConversation(message, function(res, dm){
+		dm._bot = $_temp1;
+		dm.ask('Say as who?', function(res, dm){
+			dm._who = res.text;
+			dm.next();
+			dm.ask('Icon URL?', function(res, dm){
+				dm._emoji = res.text;
+				dm.next();
+				dm.ask('Message?', function(res, dm){
+					dm._msg = res.text;
+					dm._bot.reply(message,{
+						text: dm._msg,
+						username: dm._who,
+						icon_url: dm._emoji,
+						as_user: false
+					});
+					dm.next();
+				})
+			})
+		})
+	});
+});
+sbot.hears(['^sayasurl$'], ["direct_message"], function(bot, message){
+	$_temp1 = bot;
+	bot.startPrivateConversation(message, function(res, dm){
+		dm._bot = $_temp1;
+		dm.ask('Say as who?', function(res, dm){
+			dm._who = res.text;
+			dm.next();
+			dm.ask('Icon URL?', function(res, dm){
+				dm._emoji = res.text;
+				dm.next();
+				dm.ask('Message?', function(res, dm){
+					dm._msg = res.text;
+					dm.next();
+					dm.ask('Channel ID? Check http://scratchaterscomputerbot-mrcomputer1.rhcloud.com/channel_ids/ or say @computerbot: channelid on the channel!', function(res, dm){
+						dm._ch = res.text;
+						dm._bot.say({
+							text: dm._msg,
+							username: dm._who,
+							icon_url: dm._emoji,
+							channel: dm._ch,
+							as_user: false
+						});
+						dm.next();
+					})
+				})
+			})
+		})
+	});
+});
+sbot.hears(['sayurl (.*) (.*) (.*) (.*)'], ["direct_message"], function(bot, message){
+	bot.say({
+		text: message.match[4].replace(/__/g, " "),
+		username: message.match[1],
+		icon_url: message.match[2],
+		channel: message.match[3],
+		as_user: false
 	});
 });
 var page_channel_ids = "Channel IDS: <br>" +

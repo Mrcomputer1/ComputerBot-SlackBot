@@ -1,6 +1,6 @@
 {
   "name": "scratchaters-computerbot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Adds sayas commands to Scratch-ATers slack room",
   "main": "ComputerBot.js",
   "scripts": {
@@ -9,6 +9,6 @@
   "author": "Mrcomputer1",
   "license": "MIT",
   "dependencies": {
-	"botkit": "0.0.15"
+	"botkit": "0.1.1"
   }
 }

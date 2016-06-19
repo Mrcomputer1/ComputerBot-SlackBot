@@ -1,6 +1,6 @@
 {
   "name": "scratchaters-computerbot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Adds sayas commands to Scratch-ATers slack room",
   "main": "ComputerBot.js",
   "scripts": {

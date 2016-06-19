@@ -11,7 +11,8 @@ var bot_config = {
 	restart_password: "(private)",
 	shutdown_password: "(private)",
 	bot_api_token: "(private)-(private)-(private)",
-	bot_debug: false
+	bot_debug: false,
+	log_file_name: "chat-messages.log"
 }
 
 var Botkit = require('botkit');
@@ -19,6 +20,7 @@ var Botkit = require('botkit');
 var http = require("http");
 var env = process.env;
 var exec = require('child_process').exec;
+var fs = require("fs");
  
 var sbot = Botkit.slackbot({
 	debug: bot_config.bot_debug
@@ -29,6 +31,10 @@ sbot.spawn({
 	token: bot_config.bot_api_token,
 }).startRTM()
  //'direct_message','direct_mention','mention
+ 
+var log_message = function(sender, username, message, icon, ch){
+	fs.appendFile(bot_config.log_file_name, "\nUsername:" + username + ", Icon Emoji: " + icon + ", Channel: " + ch + ", Message: " + message + ", User: " + sender, function(err){});
+};
 
 sbot.hears(['^what can you do$', '^help$'], ["mention", "direct_mention", "direct_message"], function(bot, message){
 	bot.startPrivateConversation(message, function(res, dm){
@@ -45,9 +51,11 @@ sbot.hears(['^what can you do$', '^help$'], ["mention", "direct_mention", "direc
 	});
 });
 sbot.hears(['sayas'], ["mention", "direct_mention"], function(bot, message){
-	$_temp1 = bot;
+	console.log(JSON.stringify(message));
+	$_temp1 = {bot: bot, message: message};
 	bot.startPrivateConversation(message, function(res, dm){
-		dm._bot = $_temp1;
+		dm._bot = $_temp1.bot;
+		dm._message = $_temp1.message;
 		dm.ask('Say as who?', function(res, dm){
 			dm._who = res.text;
 			dm.next();
@@ -61,6 +69,7 @@ sbot.hears(['sayas'], ["mention", "direct_mention"], function(bot, message){
 						username: dm._who,
 						icon_emoji: dm._emoji
 					});
+					log_message(dm._message.user, dm._who, dm._message.text, dm._emoji, dm._message.channel);
 					dm.next();
 				})
 			})
@@ -68,9 +77,10 @@ sbot.hears(['sayas'], ["mention", "direct_mention"], function(bot, message){
 	});
 });
 sbot.hears(['^sayas$'], ["direct_message"], function(bot, message){
-	$_temp1 = bot;
+	$_temp1 = {bot: bot, message: message};
 	bot.startPrivateConversation(message, function(res, dm){
-		dm._bot = $_temp1;
+		dm._bot = $_temp1.bot;
+		dm._message = $_temp1.message;
 		dm.ask('Say as who?', function(res, dm){
 			dm._who = res.text;
 			dm.next();
@@ -88,6 +98,7 @@ sbot.hears(['^sayas$'], ["direct_message"], function(bot, message){
 							icon_emoji: dm._emoji,
 							channel: dm._ch
 						});
+						log_message(dm._message.user, dm._who, dm._message.text, dm._emoji, dm._ch);
 						dm.next();
 					})
 				})
@@ -102,6 +113,7 @@ sbot.hears(['say (.*) (.*) (.*) (.*)'], ["direct_message"], function(bot, messag
 		icon_emoji: message.match[2],
 		channel: message.match[3]
 	});
+	log_message(message.user, message.match[1], message.match[4].replace(/__/g, " "), message.match[2], message.match[3]);
 });
 sbot.hears(['channelid'], ['mention', 'direct_mention'], function(bot, message){
 	bot.startPrivateConversation(message, function(res, dm){
@@ -162,6 +174,7 @@ sbot.hears(['sayasurl'], ["mention", "direct_mention"], function(bot, message){
 						icon_url: dm._url,
 						as_user: false
 					});
+					log_message(dm._message.user, dm._who, dm._message.text, dm._url, dm._message.channel);
 					dm.next();
 				})
 			})
@@ -190,6 +203,7 @@ sbot.hears(['^sayasurl$'], ["direct_message"], function(bot, message){
 							channel: dm._ch,
 							as_user: false
 						});
+						log_message(dm._message.user, dm._who, dm._message.text, dm._url, dm._ch);
 						dm.next();
 					})
 				})
@@ -205,6 +219,7 @@ sbot.hears(['sayurl (.*) (.*) (.*) (.*)'], ["direct_message"], function(bot, mes
 		channel: message.match[3],
 		as_user: false
 	});
+	log_message(message.user, message.match[1], message.match[4], message.match[2], message.match[3]);
 });
 
 sbot.hears(["^fun help$"], ["direct_mention", "direct_message"], function(bot, message){
@@ -347,6 +362,16 @@ var server = http.createServer(function(req, res){
 		res.setHeader('Content-Type', "text/html;charset=utf-8");
 		res.writeHead(200);
 		res.end(page_channel_ids);
+	}else if(url == "/chat-messages.log"){
+		fs.readFile("chat-messages.log", function(err, data){
+			if(err){
+				res.writeHead(500);
+				res.end("Could not load log file");
+				return;
+			}
+			res.writeHead(200);
+			res.end(data);
+		})
 	}
 	else{
 		res.writeHead(404);

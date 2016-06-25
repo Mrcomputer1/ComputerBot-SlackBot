@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Scratch ATers Channel Listing</title>
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+		<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		<style>
+		.ui-autocomplete-category {
+			font-weight: bold;
+			padding: .2em .4em;
+			margin: .8em 0 .2em;
+			line-height: 1.5;
+		}
+		</style>
+		<script>
+		$.widget("custom.catcomplete", $.ui.autocomplete, {
+			_create: function(){
+				this._super();
+				this.widget().menu("option", "items", "> :not(.ui-autocomplete-category)");
+			},
+			_renderMenu: function(ul, items){
+				var that = this,
+					currentCategory = "";
+				$.each(items, function(index, item){
+					var li;
+					if(item.category != currentCategory){
+						ul.append("<li class='ui-autocomplete-category'>" + item.category + "</li>");
+						currentCategory = item.category;
+					}
+					li = that._renderItemData(ul, item);
+					if(item.category){
+						li.attr("aria-label", item.category + " : " + item.label);
+					}
+				});
+			}
+		});
+		</script>
+		<script>
+		$(function(){
+			var data = [
+				//Channels
+				{label: "#bot-tests", category: "Channels"},
+				{label: "#formatting-testing", category: "Channels"},
+				{label: "#iapreloaded", category: "Channels"},
+				{label: "#bots", category: "Channels"},
+				{label: "#code-golf", category: "Channels"},
+				{label: "#computer-bot", category: "Channels"},
+				{label: "#general", category: "Channels"},
+				{label: "#makelstmgreatagain", category: "Channels"},
+				{label: "#minecraft", category: "Channels"},
+				{label: "#musician_aters", category: "Channels"},
+				{label: "#offtopic", category: "Channels"},
+				{label: "#open-source-licenses", category: "Channels"},
+				{label: "#random", category: "Channels"},
+				{label: "#scratch", category: "Channels"},
+				{label: "#scratch-comments", category: "Channels"},
+				{label: "#sharp", category: "Channels"},
+				{label: "#stwsbdbt", category: "Channels"},
+				{label: "#thetimeline", category: "Channels"},
+				//Users
+				{label: "@scratchyone", category: "Users"},
+				{label: "@arinerron", category: "Users"},
+				{label: "@drkat123", category: "Users"},
+				{label: "@ascom", category: "Users"},
+				{label: "@io_", category: "Users"},
+				{label: "@adespotist", category: "Users"},
+				{label: "@alex", category: "Users"},
+				{label: "@bjskistad", category: "Users"},
+				{label: "@iap-reloaded", category: "Users"},
+				{label: "@influences", category: "Users"},
+				{label: "@kvackkvack", category: "Users"},
+				{label: "@liam4", category: "Users"},
+				{label: "@megaaputurkultra", category: "Users"},
+				{label: "@moosho", category: "Users"},
+				{label: "@mrcomputer1", category: "Users"},
+				{label: "@nathanprocks", category: "Users"},
+				{label: "@pulljosh", category: "Users"},
+				//Bots
+				{label: "@computerbot", category: "Bots"},
+				{label: "@slackbot", category: "Bots"},
+				{label: "@hubot", category: "Bots"},
+				{label: "@foobot", category: "Bots"},
+				{label: "@scratchyonebot", category: "Bots"},
+			];
+			var data2 = {
+				//Channels
+				"#bot-tests": "C0U1JMXSP",
+				"#formatting-testing": "C0T8ZPLRM",
+				"#iapreloaded": "C1JTSBC5D",
+				"#bots": "C0T73S4KF",
+				"#code-golf": "C16VAL3EH",
+				"#computer-bot": "C108EE5D0",
+				"#general": "C0SEAJWJX",
+				"#makelstmgreatagain": "C192BPGE5",
+				"#minecraft": "C1JBS56SX",
+				"#musician_aters": "C0TUC0K6J",
+				"#offtopic": "C0SP3HY4C",
+				"#open-source-licenses": "C1HS1NRE1",
+				"#random": "C0SFK012S",
+				"#scratch": "C0SUFBYBE",
+				"#scratch-comments": "C15FM1FDZ",
+				"#sharp": "C1ARM7SV8",
+				"#stwsbdbt": "C1JMJ6JFJ",
+				"#thetimeline": "C0T9D54P9",
+				//Users
+				"@scratchyone": "U0STJM2EQ",
+				"@arinerron": "U0TJVHH2Q",
+				"@drkat123": "U0SEAJVDZ",
+				"@ascom": "U0SJPAYMP",
+				"@io_": "U0SP80VT3",
+				"@adespotist": "U137XEHG9",
+				"@alex": "U0TV27R25",
+				"@bjskistad": "U10KYKPLH",
+				"@iap-reloaded": "U0T2VNM2L",
+				"@influences": "U119LCHA6",
+				"@kvackkvack": "U0SRX1Z4P",
+				"@liam4": "U0SSUM7LH",
+				"@megaaputurkultra": "U0T999L7L",
+				"@moosho": "U0T91S5JA",
+				"@mrcomputer1": "U0SP1V4LE",
+				"@nathanprocks": "U0SP77U84",
+				"@pulljosh": "U0T7JEBHB",
+				//Bots
+				"@computerbot": "U0ZUBBLJD",
+				"@slackbot": "USLACKBOT",
+				"@hubot": "U0TAQU059",
+				"@foobot": "U1AMBR1GA",
+				"@scratchyonebot": "U0T57AZ99",
+			};
+			
+			$("#search").catcomplete({
+				delay: 0,
+				source: data
+			});
+			setInterval(function(){
+				if(!data2[$("#search").val()]){
+					$("#id").html("<span style='color:red'>Unknown channel or user id! Have you enter something yet?</span>");
+				}else{
+					$("#id").html("<a style='text-decoration:none;color:blue' href='javascript:prompt(\"The requested ID\",\"" + data2[$("#search").val()] + "\");void(1);'>" + data2[$("#search").val()] + "</a>&nbsp;&nbsp;" +
+					"<a href='https://scratch-aters.slack.com/messages/" + data2[$("#search").val()] + "/" + "' style='border:1px solid blue;background-color:blue;text-decoration:none;color:white;padding:3px;border-radius:5px'>Open</a>&nbsp;&nbsp;" +
+					"<a href='javascript:prompt(\"Your requested link\", \"http://scratchaterscomputerbot-mrcomputer1.rhcloud.com/id_finder#" + $("#search").val() + "\");void(1);' style='border:1px solid blue;background-color:blue;text-decoration:none;color:white;padding:3px;border-radius:5px'>Link to ID</a>");
+				}
+			}, 500);
+		});
+		$(document).ready(function(){
+			if(document.location.hash){
+				$("#search").val(document.location.hash.replace("#", ""));
+			}
+		});
+		</script>
+	</head>
+	<body>
+		<input type="text" placeholder="Channel name or user" id="search" style="width:98%;padding:10px;border-radius:10px;font-size:1.5em;border:1px solid black">
+		<br><br>
+		<div style="border:1px solid black;font-size:1.5em;border-radius:10px;padding:10px;" id="id">
+			<span style="color:red">Unknown channel or user id! Have you enter something yet?</span>
+		</div>
+		<br><br>
+		<b>If any ID is not working or a channel/user is missing then please report it by Direct Messaging @mrcomputer1 on the Scratch-ATers Slack</b>

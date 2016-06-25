@@ -13,7 +13,7 @@ var bot_config = {
 	bot_api_token: "(private)-(private)-(private)",
 	bot_debug: false,
 	log_file_name: "chat-messages.log"
-}
+};
 
 var Botkit = require('botkit');
 //var fs = require("fs");
@@ -69,7 +69,7 @@ sbot.hears(['sayas'], ["mention", "direct_mention"], function(bot, message){
 						username: dm._who,
 						icon_emoji: dm._emoji
 					});
-					log_message(dm._message.user, dm._who, dm._message.text, dm._emoji, dm._message.channel);
+					log_message(dm._message.user, dm._who, dm._msg, dm._emoji, dm._message.channel);
 					dm.next();
 				})
 			})
@@ -90,7 +90,7 @@ sbot.hears(['^sayas$'], ["direct_message"], function(bot, message){
 				dm.ask('Message?', function(res, dm){
 					dm._msg = res.text;
 					dm.next();
-					dm.ask('Channel ID? Check http://scratchaterscomputerbot-mrcomputer1.rhcloud.com/channel_ids/ or say @computerbot: channelid on the channel!', function(res, dm){
+					dm.ask('Channel ID? Check http://scratchaterscomputerbot-mrcomputer1.rhcloud.com/id_finder/ or say @computerbot: channelid on the channel!', function(res, dm){
 						dm._ch = res.text;
 						dm._bot.say({
 							text: dm._msg,
@@ -98,7 +98,7 @@ sbot.hears(['^sayas$'], ["direct_message"], function(bot, message){
 							icon_emoji: dm._emoji,
 							channel: dm._ch
 						});
-						log_message(dm._message.user, dm._who, dm._message.text, dm._emoji, dm._ch);
+						log_message(dm._message.user, dm._who, dm._msg, dm._emoji, dm._ch);
 						dm.next();
 					})
 				})
@@ -157,9 +157,10 @@ sbot.hears(['^restart$'], ['direct_message'], function(bot, message){
 	});
 });
 sbot.hears(['sayasurl'], ["mention", "direct_mention"], function(bot, message){
-	$_temp1 = bot;
+	$_temp1 = {bot: bot, message: message};
 	bot.startPrivateConversation(message, function(res, dm){
-		dm._bot = $_temp1;
+		dm._bot = $_temp1.bot;
+		dm._message = $_temp1.message;
 		dm.ask('Say as who?', function(res, dm){
 			dm._who = res.text;
 			dm.next();
@@ -174,7 +175,7 @@ sbot.hears(['sayasurl'], ["mention", "direct_mention"], function(bot, message){
 						icon_url: dm._url,
 						as_user: false
 					});
-					log_message(dm._message.user, dm._who, dm._message.text, dm._url, dm._message.channel);
+					log_message(dm._message.user, dm._who, dm._msg, dm._url, dm._message.channel);
 					dm.next();
 				})
 			})
@@ -182,9 +183,10 @@ sbot.hears(['sayasurl'], ["mention", "direct_mention"], function(bot, message){
 	});
 });
 sbot.hears(['^sayasurl$'], ["direct_message"], function(bot, message){
-	$_temp1 = bot;
+	$_temp1 = {bot: bot, message: message};
 	bot.startPrivateConversation(message, function(res, dm){
-		dm._bot = $_temp1;
+		dm._bot = $_temp1.bot;
+		dm._message = $_temp1.message;
 		dm.ask('Say as who?', function(res, dm){
 			dm._who = res.text;
 			dm.next();
@@ -194,7 +196,7 @@ sbot.hears(['^sayasurl$'], ["direct_message"], function(bot, message){
 				dm.ask('Message?', function(res, dm){
 					dm._msg = res.text;
 					dm.next();
-					dm.ask('Channel ID? Check http://scratchaterscomputerbot-mrcomputer1.rhcloud.com/channel_ids/ or say @computerbot: channelid on the channel!', function(res, dm){
+					dm.ask('Channel ID? Check http://scratchaterscomputerbot-mrcomputer1.rhcloud.com/id_finder/ or say @computerbot: channelid on the channel!', function(res, dm){
 						dm._ch = res.text;
 						dm._bot.say({
 							text: dm._msg,
@@ -203,7 +205,7 @@ sbot.hears(['^sayasurl$'], ["direct_message"], function(bot, message){
 							channel: dm._ch,
 							as_user: false
 						});
-						log_message(dm._message.user, dm._who, dm._message.text, dm._url, dm._ch);
+						log_message(dm._message.user, dm._who, dm._msg, dm._url, dm._ch);
 						dm.next();
 					})
 				})
@@ -219,7 +221,7 @@ sbot.hears(['sayurl (.*) (.*) (.*) (.*)'], ["direct_message"], function(bot, mes
 		channel: message.match[3],
 		as_user: false
 	});
-	log_message(message.user, message.match[1], message.match[4], message.match[2], message.match[3]);
+	log_message(message.user, message.match[1], message.match[4].replace(/__/g, " "), message.match[2], message.match[3]);
 });
 
 sbot.hears(["^fun help$"], ["direct_mention", "direct_message"], function(bot, message){
@@ -328,7 +330,7 @@ sbot.hears(["echo (.*)"], ["mention", "direct_mention", "direct_message"], funct
 });
 
 
-
+// Old channel IDs
 var page_channel_ids = "Channel IDS: <br>" +
 "<table>" +
 	"<thead style='background-color:lightgrey'>" +
@@ -349,6 +351,7 @@ var page_channel_ids = "Channel IDS: <br>" +
 	"</tbody>" +
 "</table>" + "<br><br>" +
 "If any ID is not working or a channel is missing then please report it by Direct Messaging @mrcomputer1 on the Scratch-ATers Slack";
+// /Old channel IDS
 
 var server = http.createServer(function(req, res){
 	var url = req.url;
@@ -359,9 +362,27 @@ var server = http.createServer(function(req, res){
 		res.writeHead(200);
 		res.end("Working well!");
 	}else if(url == "/channel_ids/"){
+		//res.setHeader('Content-Type', "text/html;charset=utf-8");
+		res.setHeader("Location", "/id_finder/");
+		res.writeHead(300);
+		res.end(page_channel_ids);
+	}else if(url == "/channel_ids/?stay=1"){
 		res.setHeader('Content-Type', "text/html;charset=utf-8");
 		res.writeHead(200);
 		res.end(page_channel_ids);
+	}else if(url == "/id_finder/"){
+		fs.readFile("channels.html", function(err, data){
+			if(err){
+				res.setHeader("Content-Type", "text/html;charset=utf-8");
+				res.writeHead(500);
+				res.end("<h1>Something went wrong!</h1><pre>" + err + "</pre>");
+				return;
+			}
+			
+			res.setHeader('Content-Type', "text/html;charset=utf-8");
+			res.writeHead(200);
+			res.end(data);
+		});
 	}else if(url == "/chat-messages.log"){
 		fs.readFile("chat-messages.log", function(err, data){
 			if(err){
